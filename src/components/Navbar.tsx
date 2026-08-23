@@ -27,7 +27,7 @@ export default function Navbar() {
             style={{
               width: 36,
               height: 36,
-              background: 'linear-gradient(135deg, var(--brand-500), var(--purple-600))',
+              background: 'linear-gradient(135deg, var(--cyan-400), var(--mint-300))',
             }}
           >
             <i className="bi bi-code-slash text-white fs-5" />

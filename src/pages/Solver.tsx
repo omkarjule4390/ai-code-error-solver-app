@@ -21,6 +21,7 @@ export default function Solver() {
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<ErrorReport | null>(null)
   const [bookmarked, setBookmarked] = useState(false)
+  const [apiError, setApiError] = useState<string | null>(null)
 
   const handleAnalyze = async () => {
     if (!code.trim() || !errorMessage.trim()) {
@@ -30,6 +31,7 @@ export default function Solver() {
     if (!user) return
     setLoading(true)
     setResult(null)
+    setApiError(null)
     try {
       const analysis = await aiSolverApi.analyze({
         codeSnippet: code,
@@ -44,10 +46,10 @@ export default function Solver() {
       })
       setResult(saved)
       setBookmarked(saved.bookmarked)
-      toast.success('Analysis complete!')
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Something went wrong'
-      toast.error(message)
+      toast.success('Analysis completed successfully.')
+    } catch {
+      setApiError('Unable to analyze the code. Please try again.')
+      toast.error('Analysis failed')
     } finally {
       setLoading(false)
     }
@@ -107,14 +109,28 @@ export default function Solver() {
             className="btn btn-brand w-100 py-2 fw-semibold d-flex align-items-center justify-content-center gap-2"
           >
             {loading ? <span className="spinner-border spinner-border-sm" /> : <i className="bi bi-stars" />}
-            {loading ? 'Analyzing...' : 'Analyze with AI'}
+            {loading ? 'Analyzing Code...' : '⚡ Analyze Code'}
           </button>
         </div>
 
         <div className="col-12 col-lg-6">
           <div className="bg-surface rounded-xl p-3 h-100">
             <AnimatePresence mode="wait">
-              {result ? (
+              {apiError ? (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="d-flex flex-column align-items-center justify-content-center text-center gap-3"
+                  style={{ minHeight: 300 }}
+                >
+                  <i className="bi bi-exclamation-circle fs-1" style={{ color: 'var(--severity-high, #fb923c)' }} />
+                  <p className="small text-muted-soft mb-0">{apiError}</p>
+                  <button onClick={handleAnalyze} className="btn btn-outline-brand btn-sm">
+                    <i className="bi bi-arrow-clockwise me-1" />
+                    Retry
+                  </button>
+                </motion.div>
+              ) : result ? (
                 <div>
                   <div className="d-flex align-items-center justify-content-between mb-3">
                     <h2 className="fs-5 fw-semibold text-white mb-0">Analysis Result</h2>
@@ -123,7 +139,11 @@ export default function Solver() {
                       {bookmarked ? 'Bookmarked' : 'Bookmark'}
                     </button>
                   </div>
-                  <ErrorResultCard analysis={result.aiAnalysis} language={result.programmingLanguage} />
+                  <ErrorResultCard
+                    analysis={result.aiAnalysis}
+                    language={result.programmingLanguage}
+                    originalCode={result.codeSnippet}
+                  />
                 </div>
               ) : (
                 <motion.div

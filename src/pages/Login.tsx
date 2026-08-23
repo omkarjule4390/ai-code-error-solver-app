@@ -39,7 +39,7 @@ export default function Login() {
         <div className="d-flex flex-column align-items-center gap-2 text-center mb-4">
           <div
             className="d-flex align-items-center justify-content-center rounded-3"
-            style={{ width: 48, height: 48, background: 'linear-gradient(135deg, var(--brand-500), var(--purple-600))' }}
+            style={{ width: 48, height: 48, background: 'linear-gradient(135deg, var(--cyan-400), var(--mint-300))' }}
           >
             <i className="bi bi-code-slash text-white fs-4" />
           </div>

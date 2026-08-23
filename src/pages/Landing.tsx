@@ -11,37 +11,39 @@ export default function Landing() {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
         <span
           className="d-inline-flex align-items-center gap-2 pill mb-3"
-          style={{ background: 'rgba(109,117,245,0.1)', color: 'var(--brand-400)', border: '1px solid rgba(109,117,245,0.3)' }}
+          style={{ background: 'rgba(25,211,197,0.1)', color: 'var(--cyan-400)', border: '1px solid rgba(25,211,197,0.3)' }}
         >
-          <i className="bi bi-stars" /> AI-powered debugging
+          <i className="bi bi-cpu" /> AI Developer Laboratory
         </span>
         <h1 className="display-4 fw-bold">
-          Stop staring at <span className="text-brand">stack traces.</span>
+          AI Code <span className="text-brand">Error Solver</span>
         </h1>
-        <p className="mx-auto mt-3 text-muted-soft fs-5" style={{ maxWidth: 640 }}>
-          Paste your code and the error message. Get the root cause, a corrected fix, and best practices — in
-          seconds.
+        <p className="fs-5 fw-semibold mt-2 mb-0" style={{ color: 'var(--mint-300)' }}>
+          Find. Understand. Fix. Learn.
+        </p>
+        <p className="mx-auto mt-3 text-muted-soft fs-6" style={{ maxWidth: 640 }}>
+          An intelligent coding assistant that detects errors, explains the root cause, and generates reliable
+          corrected code.
         </p>
         <div className="mt-4 d-flex justify-content-center gap-3 flex-wrap">
           <Link to={isAuthenticated ? '/solver' : '/register'} className="btn btn-brand px-4 py-2 fw-semibold">
-            {isAuthenticated ? 'Start solving' : 'Get started free'} <i className="bi bi-arrow-right ms-1" />
+            <i className="bi bi-lightning-charge-fill me-1" />
+            Analyze My Code
           </Link>
-          {!isAuthenticated && (
-            <Link to="/login" className="btn btn-outline-brand px-4 py-2">
-              Log in
-            </Link>
-          )}
+          <a href="#features" className="btn btn-outline-brand px-4 py-2">
+            Explore Features
+          </a>
         </div>
       </motion.div>
 
-      <div className="row g-4 mt-5 text-start">
+      <div id="features" className="row g-4 mt-5 text-start">
         <div className="col-12 col-sm-4">
           <Feature icon="bi-lightning-charge-fill" iconColor="#fbbf24" title="Instant root-cause analysis">
             AI reads your code and error together, pinpointing exactly what went wrong.
           </Feature>
         </div>
         <div className="col-12 col-sm-4">
-          <Feature icon="bi-stars" iconColor="var(--brand-400)" title="Corrected code, ready to use">
+          <Feature icon="bi-stars" iconColor="var(--cyan-400)" title="Corrected code, ready to use">
             Get a working fix side-by-side with your original snippet.
           </Feature>
         </div>

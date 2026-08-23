@@ -1,10 +1,6 @@
-// Supabase Edge Function (Deno runtime)
-// Deploy with: supabase functions deploy solve-error
-// Set the secret with:  supabase secrets set OPENAI_API_KEY=sk-...
-//
-// This function receives { codeSnippet, errorMessage, programmingLanguage },
-// calls OpenAI, and returns a structured AiAnalysis object. The OpenAI key
-// never reaches the browser because it only exists as a server-side secret.
+// Supabase Edge Function (Deno runtime) — uses Groq (free)
+// Deploy via the Supabase dashboard Edge Functions editor.
+// Set the secret with:  GROQ_API_KEY=gsk_...
 
 import { serve } from 'https://deno.land/std@0.203.0/http/server.ts'
 
@@ -19,20 +15,38 @@ interface RequestBody {
   programmingLanguage: string
 }
 
-const SYSTEM_PROMPT = `You are a senior software engineer helping debug code.
-Given a code snippet, an error message, and a programming language, respond ONLY with
-a JSON object matching this exact shape (no markdown, no commentary):
+const SYSTEM_PROMPT = `You are a senior software engineer and code intelligence assistant.
+Given a code snippet, an error message/stack trace, and a programming language, analyze
+the root cause and respond ONLY with a JSON object matching this exact shape (no markdown,
+no commentary, no code fences):
 
 {
-  "rootCause": string,
-  "explanation": string,
-  "correctedCode": string,
+  "errorType": string,            // e.g. "Syntax Error", "Runtime Error", "Type Error", "Import Error"
+  "rootCause": string,            // short, accurate description of the actual cause
+  "explanation": string,          // clear, beginner-friendly explanation of why it happened
+  "lineNumber": number | null,    // best-guess line number if determinable, else null
+  "fileName": string | null,      // file name if mentioned/determinable, else null
+  "originalError": string,        // echo back the error message/stack trace as given
+  "correctedCode": string,        // the best corrected version of the full code
+  "solutions": [                  // 1-3 valid solutions; only include more than 1 when genuinely useful
+    {
+      "title": string,
+      "description": string,
+      "code": string,
+      "whenToUse": string
+    }
+  ],
+  "bestRecommendation": string,   // which solution to prefer and why
+  "preventionTip": string,        // how to avoid this error in the future
   "bestPractices": string[],
   "relatedConcepts": string[],
   "severity": "LOW" | "MEDIUM" | "HIGH" | "CRITICAL",
-  "confidenceScore": number,
+  "confidenceScore": number,      // a fraction between 0 and 1, e.g. 0.95
   "tokensUsed": number
-}`
+}
+
+Use correct syntax and idioms for the given programming language only. Do not mix syntax
+from other languages. Keep "solutions" to exactly one entry when there is only one clear fix.`
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -49,9 +63,9 @@ serve(async (req) => {
       })
     }
 
-    const apiKey = Deno.env.get('OPENAI_API_KEY')
+    const apiKey = Deno.env.get('GROQ_API_KEY')
     if (!apiKey) {
-      return new Response(JSON.stringify({ error: 'OPENAI_API_KEY not configured' }), {
+      return new Response(JSON.stringify({ error: 'GROQ_API_KEY not configured' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
@@ -59,14 +73,14 @@ serve(async (req) => {
 
     const userPrompt = `Language: ${programmingLanguage}\n\nCode:\n${codeSnippet}\n\nError:\n${errorMessage}`
 
-    const aiRes = await fetch('https://api.openai.com/v1/chat/completions', {
+    const aiRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'openai/gpt-oss-20b',
         response_format: { type: 'json_object' },
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
@@ -78,7 +92,7 @@ serve(async (req) => {
 
     if (!aiRes.ok) {
       const errText = await aiRes.text()
-      return new Response(JSON.stringify({ error: `OpenAI error: ${errText}` }), {
+      return new Response(JSON.stringify({ error: `Groq error: ${errText}` }), {
         status: 502,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
@@ -87,6 +101,17 @@ serve(async (req) => {
     const aiJson = await aiRes.json()
     const content = aiJson.choices?.[0]?.message?.content ?? '{}'
     const analysis = JSON.parse(content)
+
+    // Defensive defaults so the frontend never renders empty/undefined sections.
+    analysis.errorType = analysis.errorType ?? 'Unknown'
+    analysis.lineNumber = analysis.lineNumber ?? null
+    analysis.fileName = analysis.fileName ?? null
+    analysis.originalError = analysis.originalError ?? errorMessage
+    analysis.solutions = Array.isArray(analysis.solutions) ? analysis.solutions : []
+    analysis.bestRecommendation = analysis.bestRecommendation ?? ''
+    analysis.preventionTip = analysis.preventionTip ?? ''
+    analysis.bestPractices = Array.isArray(analysis.bestPractices) ? analysis.bestPractices : []
+    analysis.relatedConcepts = Array.isArray(analysis.relatedConcepts) ? analysis.relatedConcepts : []
     analysis.tokensUsed = aiJson.usage?.total_tokens ?? 0
 
     return new Response(JSON.stringify(analysis), {

@@ -85,7 +85,7 @@ function StatCard({ icon, label, value }: { icon: string; label: string; value: 
     <motion.div whileHover={{ y: -2 }} className="bg-surface rounded-xl p-3">
       <div
         className="d-flex align-items-center justify-content-center rounded-3 mb-2"
-        style={{ width: 36, height: 36, background: 'rgba(109,117,245,0.15)', color: 'var(--brand-400)' }}
+        style={{ width: 36, height: 36, background: 'rgba(109,117,245,0.15)', color: 'var(--cyan-400)' }}
       >
         <i className={`bi ${icon}`} />
       </div>

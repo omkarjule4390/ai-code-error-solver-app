@@ -7,13 +7,28 @@ export interface Profile {
 
 export type Severity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'
 
+export interface AiSolution {
+  title: string
+  description: string
+  code: string
+  whenToUse?: string
+}
+
 export interface AiAnalysis {
+  errorType: string
   rootCause: string
   explanation: string
+  lineNumber: number | null
+  fileName: string | null
+  originalError: string
   correctedCode: string
+  solutions: AiSolution[]
+  bestRecommendation: string
+  preventionTip: string
   bestPractices: string[]
   relatedConcepts: string[]
   severity: Severity
+  /** Always stored as a 0–1 fraction. Use formatConfidence() to display. */
   confidenceScore: number
   tokensUsed: number
 }
