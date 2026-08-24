@@ -1,4 +1,4 @@
-import { supabase } from '@/supabaseClient'
+import { supabase, isMockMode } from '@/supabaseClient'
 import type { Profile } from '@/types'
 
 function mapProfile(row: { id: string; email: string; full_name: string; created_at: string }): Profile {
@@ -12,6 +12,18 @@ function mapProfile(row: { id: string; email: string; full_name: string; created
 
 export const authApi = {
   async register(email: string, password: string, fullName: string): Promise<Profile> {
+    if (isMockMode) {
+      const mockUser: Profile = {
+        id: 'mock-user-id',
+        email,
+        fullName,
+        createdAt: new Date().toISOString(),
+      }
+      localStorage.setItem('mock_user_profile', JSON.stringify(mockUser))
+      localStorage.setItem('mock_session', JSON.stringify({ user: mockUser }))
+      return mockUser
+    }
+
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -31,24 +43,62 @@ export const authApi = {
   },
 
   async login(email: string, password: string): Promise<Profile> {
+    if (isMockMode) {
+      const savedProfileStr = localStorage.getItem('mock_user_profile')
+      let profile: Profile
+      if (savedProfileStr) {
+        profile = JSON.parse(savedProfileStr)
+        if (profile.email !== email) {
+          profile = { id: 'mock-user-id', email, fullName: email.split('@')[0], createdAt: new Date().toISOString() }
+        }
+      } else {
+        profile = { id: 'mock-user-id', email, fullName: email.split('@')[0], createdAt: new Date().toISOString() }
+      }
+      localStorage.setItem('mock_user_profile', JSON.stringify(profile))
+      localStorage.setItem('mock_session', JSON.stringify({ user: profile }))
+      return profile
+    }
+
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) throw error
     return authApi.me(data.user.id)
   },
 
   async logout() {
+    if (isMockMode) {
+      localStorage.removeItem('mock_session')
+      return
+    }
+
     const { error } = await supabase.auth.signOut()
     if (error) throw error
   },
 
   async me(userId: string): Promise<Profile> {
+    if (isMockMode) {
+      const savedProfileStr = localStorage.getItem('mock_user_profile')
+      if (savedProfileStr) {
+        return JSON.parse(savedProfileStr)
+      }
+      return { id: 'mock-user-id', email: 'mock@example.com', fullName: 'Mock Developer', createdAt: new Date().toISOString() }
+    }
+
     const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single()
     if (error) throw error
     return mapProfile(data)
   },
 
   async getSession() {
+    if (isMockMode) {
+      const sessionStr = localStorage.getItem('mock_session')
+      if (sessionStr) {
+        return JSON.parse(sessionStr)
+      }
+      return null
+    }
+
     const { data } = await supabase.auth.getSession()
     return data.session
   },
 }
+

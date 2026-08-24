@@ -9,7 +9,7 @@ import Dashboard from '@/pages/Dashboard'
 import Solver from '@/pages/Solver'
 import History from '@/pages/History'
 import Bookmarks from '@/pages/Bookmarks'
-import { supabase } from '@/supabaseClient'
+import { supabase, isMockMode } from '@/supabaseClient'
 import { authApi } from '@/api/auth'
 import { useAuthStore } from '@/store/authStore'
 
@@ -18,6 +18,29 @@ export default function App() {
 
   useEffect(() => {
     let mounted = true
+
+    if (isMockMode) {
+      authApi
+        .getSession()
+        .then(async (session) => {
+          if (!mounted) return
+          if (session?.user) {
+            try {
+              const profile = await authApi.me(session.user.id)
+              setUser(profile)
+            } catch {
+              clearAuth()
+            }
+          }
+        })
+        .finally(() => {
+          if (mounted) setInitializing(false)
+        })
+
+      return () => {
+        mounted = false
+      }
+    }
 
     authApi
       .getSession()
@@ -55,6 +78,7 @@ export default function App() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
 
   return (
     <div style={{ minHeight: '100vh' }}>

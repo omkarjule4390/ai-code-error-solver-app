@@ -30,7 +30,7 @@ export default function Navbar() {
               background: 'linear-gradient(135deg, var(--cyan-400), var(--mint-300))',
             }}
           >
-            <i className="bi bi-code-slash text-white fs-5" />
+            <i className="bi bi-code-slash fs-5" style={{ color: 'var(--navy-950)' }} />
           </div>
           <span className="fw-semibold fs-5 text-white">
             AI Code <span className="text-brand">Error Solver</span>

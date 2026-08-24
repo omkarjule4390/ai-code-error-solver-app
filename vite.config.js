@@ -4,7 +4,7 @@ import path from 'path';
 // Set base to your GitHub repo name for Project Pages, e.g. '/ai-code-error-solver/'
 // If deploying to a *.github.io user/organization page, leave base as '/'.
 export default defineConfig({
-    base: '/ai-code-error-solver/',
+    base: '/ai-code-error-solver-app/',
     plugins: [react()],
     resolve: {
         alias: {
