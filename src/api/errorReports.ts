@@ -1,9 +1,10 @@
-import { supabase, isMockMode } from '@/supabaseClient'
+import { supabase } from '@/supabaseClient'
 import type { AiAnalysis, ErrorReport } from '@/types'
 
 interface ErrorReportRow {
   id: string
   user_id: string
+  code_name?: string | null
   code_snippet: string
   error_message: string
   programming_language: string
@@ -17,6 +18,7 @@ function mapRow(row: ErrorReportRow): ErrorReport {
   return {
     id: row.id,
     userId: row.user_id,
+    codeName: row.code_name && row.code_name.trim() ? row.code_name : 'Untitled Code',
     codeSnippet: row.code_snippet,
     errorMessage: row.error_message,
     programmingLanguage: row.programming_language,
@@ -27,44 +29,22 @@ function mapRow(row: ErrorReportRow): ErrorReport {
   }
 }
 
-const MOCK_REPORTS_KEY = 'mock_error_reports'
-
-function getMockReports(): ErrorReport[] {
-  const data = localStorage.getItem(MOCK_REPORTS_KEY)
-  return data ? JSON.parse(data) : []
-}
-
-function saveMockReports(reports: ErrorReport[]) {
-  localStorage.setItem(MOCK_REPORTS_KEY, JSON.stringify(reports))
-}
-
 export const errorReportsApi = {
   async create(
     userId: string,
-    payload: { codeSnippet: string; errorMessage: string; programmingLanguage: string; aiAnalysis: AiAnalysis },
+    payload: {
+      codeName: string
+      codeSnippet: string
+      errorMessage: string
+      programmingLanguage: string
+      aiAnalysis: AiAnalysis
+    },
   ): Promise<ErrorReport> {
-    if (isMockMode) {
-      const reports = getMockReports()
-      const newReport: ErrorReport = {
-        id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2),
-        userId,
-        codeSnippet: payload.codeSnippet,
-        errorMessage: payload.errorMessage,
-        programmingLanguage: payload.programmingLanguage,
-        aiAnalysis: payload.aiAnalysis,
-        solved: true,
-        bookmarked: false,
-        createdAt: new Date().toISOString(),
-      }
-      reports.unshift(newReport)
-      saveMockReports(reports)
-      return newReport
-    }
-
     const { data, error } = await supabase
       .from('error_reports')
       .insert({
         user_id: userId,
+        code_name: payload.codeName,
         code_snippet: payload.codeSnippet,
         error_message: payload.errorMessage,
         programming_language: payload.programmingLanguage,
@@ -78,19 +58,6 @@ export const errorReportsApi = {
   },
 
   async getHistory(userId: string, page = 0, size = 10): Promise<{ content: ErrorReport[]; totalPages: number; last: boolean }> {
-    if (isMockMode) {
-      const reports = getMockReports().filter((r) => r.userId === userId)
-      const from = page * size
-      const to = from + size
-      const paginated = reports.slice(from, to)
-      const totalPages = Math.max(1, Math.ceil(reports.length / size))
-      return {
-        content: paginated,
-        totalPages,
-        last: page >= totalPages - 1,
-      }
-    }
-
     const from = page * size
     const to = from + size - 1
     const { data, count, error } = await supabase
@@ -106,13 +73,6 @@ export const errorReportsApi = {
   },
 
   async getStats(userId: string): Promise<{ totalReports: number; solvedReports: number }> {
-    if (isMockMode) {
-      const reports = getMockReports().filter((r) => r.userId === userId)
-      const totalReports = reports.length
-      const solvedReports = reports.filter((r) => r.solved).length
-      return { totalReports, solvedReports }
-    }
-
     const { count: total, error: e1 } = await supabase
       .from('error_reports')
       .select('*', { count: 'exact', head: true })
@@ -128,27 +88,12 @@ export const errorReportsApi = {
   },
 
   async remove(id: string) {
-    if (isMockMode) {
-      const reports = getMockReports()
-      const filtered = reports.filter((r) => r.id !== id)
-      saveMockReports(filtered)
-      return
-    }
-
     const { error } = await supabase.from('error_reports').delete().eq('id', id)
     if (error) throw error
   },
 
   async setBookmarked(id: string, bookmarked: boolean) {
-    if (isMockMode) {
-      const reports = getMockReports()
-      const updated = reports.map((r) => (r.id === id ? { ...r, bookmarked } : r))
-      saveMockReports(updated)
-      return
-    }
-
     const { error } = await supabase.from('error_reports').update({ bookmarked }).eq('id', id)
     if (error) throw error
   },
 }
-

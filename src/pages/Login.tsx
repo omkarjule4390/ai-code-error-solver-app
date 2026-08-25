@@ -41,7 +41,7 @@ export default function Login() {
             className="d-flex align-items-center justify-content-center rounded-3"
             style={{ width: 48, height: 48, background: 'linear-gradient(135deg, var(--cyan-400), var(--mint-300))' }}
           >
-            <i className="bi bi-code-slash fs-4" style={{ color: 'var(--navy-950)' }} />
+            <i className="bi bi-code-slash text-white fs-4" />
           </div>
           <h1 className="fs-3 fw-semibold text-white mb-0">Welcome back</h1>
           <p className="small text-muted-soft mb-0">Log in to keep debugging faster</p>

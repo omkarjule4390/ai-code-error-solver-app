@@ -1,9 +1,10 @@
-import { supabase, isMockMode } from '@/supabaseClient'
+import { supabase } from '@/supabaseClient'
 import type { ErrorReport } from '@/types'
 
 interface ErrorReportRow {
   id: string
   user_id: string
+  code_name?: string | null
   code_snippet: string
   error_message: string
   programming_language: string
@@ -17,6 +18,7 @@ function mapRow(row: ErrorReportRow): ErrorReport {
   return {
     id: row.id,
     userId: row.user_id,
+    codeName: row.code_name && row.code_name.trim() ? row.code_name : 'Untitled Code',
     codeSnippet: row.code_snippet,
     errorMessage: row.error_message,
     programmingLanguage: row.programming_language,
@@ -29,21 +31,6 @@ function mapRow(row: ErrorReportRow): ErrorReport {
 
 export const bookmarksApi = {
   async getBookmarks(userId: string, page = 0, size = 10): Promise<{ content: ErrorReport[]; totalPages: number; last: boolean }> {
-    if (isMockMode) {
-      const data = localStorage.getItem('mock_error_reports')
-      const reports: ErrorReport[] = data ? JSON.parse(data) : []
-      const bookmarked = reports.filter((r) => r.userId === userId && r.bookmarked)
-      const from = page * size
-      const to = from + size
-      const paginated = bookmarked.slice(from, to)
-      const totalPages = Math.max(1, Math.ceil(bookmarked.length / size))
-      return {
-        content: paginated,
-        totalPages,
-        last: page >= totalPages - 1,
-      }
-    }
-
     const from = page * size
     const to = from + size - 1
     const { data, count, error } = await supabase
@@ -59,4 +46,3 @@ export const bookmarksApi = {
     return { content: (data ?? []).map(mapRow), totalPages, last: page >= totalPages - 1 }
   },
 }
-

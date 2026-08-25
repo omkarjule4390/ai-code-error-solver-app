@@ -1,13 +1,17 @@
 import { useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
+import { Modal } from 'react-bootstrap'
 import { errorReportsApi } from '@/api/errorReports'
 import { useAuthStore } from '@/store/authStore'
+import ErrorResultCard from '@/components/ErrorResultCard'
+import type { ErrorReport } from '@/types'
 
 export default function History() {
   const user = useAuthStore((s) => s.user)
   const userId = user?.id ?? ''
   const [page, setPage] = useState(0)
+  const [viewing, setViewing] = useState<ErrorReport | null>(null)
   const queryClient = useQueryClient()
 
   const { data } = useQuery({
@@ -21,6 +25,7 @@ export default function History() {
       await errorReportsApi.remove(id)
       toast.success('Report deleted')
       queryClient.invalidateQueries({ queryKey: ['history'] })
+      if (viewing?.id === id) setViewing(null)
     } catch {
       toast.error('Could not delete report')
     }
@@ -40,8 +45,9 @@ export default function History() {
                   className={`bi ${item.solved ? 'bi-check-circle-fill text-success' : 'bi-x-circle text-muted-soft'} mt-1`}
                 />
                 <div>
-                  <p className="small fw-medium text-white mb-0">{item.programmingLanguage}</p>
-                  <p className="small text-muted-soft mb-0 text-truncate" style={{ maxWidth: 460 }}>
+                  <p className="small fw-semibold text-white mb-0">{item.codeName || 'Untitled Code'}</p>
+                  <p className="small text-muted-soft mb-0">{item.programmingLanguage}</p>
+                  <p className="small text-muted-soft mb-0 text-truncate" style={{ maxWidth: 420 }}>
                     {item.errorMessage}
                   </p>
                   <p className="text-muted-soft mb-0" style={{ fontSize: '0.7rem' }}>
@@ -49,13 +55,23 @@ export default function History() {
                   </p>
                 </div>
               </div>
-              <button
-                onClick={() => handleDelete(item.id)}
-                className="btn btn-sm text-muted-soft"
-                aria-label="Delete report"
-              >
-                <i className="bi bi-trash3" />
-              </button>
+              <div className="d-flex align-items-center gap-1">
+                <button
+                  onClick={() => setViewing(item)}
+                  className="btn btn-sm btn-outline-brand"
+                  aria-label="View report"
+                >
+                  <i className="bi bi-eye me-1" />
+                  View
+                </button>
+                <button
+                  onClick={() => handleDelete(item.id)}
+                  className="btn btn-sm text-muted-soft"
+                  aria-label="Delete report"
+                >
+                  <i className="bi bi-trash3" />
+                </button>
+              </div>
             </div>
           ))
         ) : (
@@ -82,6 +98,27 @@ export default function History() {
           </button>
         </div>
       )}
+
+      <Modal show={!!viewing} onHide={() => setViewing(null)} size="lg" centered scrollable contentClassName="bg-surface-solid text-white">
+        {viewing && (
+          <>
+            <Modal.Header closeButton closeVariant="white" style={{ borderColor: 'var(--border-800)' }}>
+              <Modal.Title>
+                <span className="fs-6 fw-semibold">{viewing.codeName || 'Untitled Code'}</span>
+                <span className="small text-muted-soft ms-2">{viewing.programmingLanguage}</span>
+              </Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <p className="small text-muted-soft mb-3">{new Date(viewing.createdAt).toLocaleString()}</p>
+              <ErrorResultCard
+                analysis={viewing.aiAnalysis}
+                language={viewing.programmingLanguage}
+                originalCode={viewing.codeSnippet}
+              />
+            </Modal.Body>
+          </>
+        )}
+      </Modal>
     </div>
   )
 }

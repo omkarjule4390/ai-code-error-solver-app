@@ -36,6 +36,7 @@ export interface AiAnalysis {
 export interface ErrorReport {
   id: string
   userId: string
+  codeName: string
   codeSnippet: string
   errorMessage: string
   programmingLanguage: string

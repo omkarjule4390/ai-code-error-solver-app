@@ -16,6 +16,7 @@ const LANGUAGES = [
 export default function Solver() {
   const user = useAuthStore((s) => s.user)
   const [code, setCode] = useState('')
+  const [codeName, setCodeName] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
   const [language, setLanguage] = useState('javascript')
   const [loading, setLoading] = useState(false)
@@ -38,7 +39,12 @@ export default function Solver() {
         errorMessage,
         programmingLanguage: language,
       })
+      const fallbackName = `${language.charAt(0).toUpperCase()}${language.slice(1)} Code - ${new Date().toLocaleDateString(
+        'en-GB',
+        { day: '2-digit', month: 'short', year: 'numeric' },
+      )}`
       const saved = await errorReportsApi.create(user.id, {
+        codeName: codeName.trim() || fallbackName,
         codeSnippet: code,
         errorMessage,
         programmingLanguage: language,
@@ -77,6 +83,15 @@ export default function Solver() {
 
       <div className="row g-4">
         <div className="col-12 col-lg-6 d-flex flex-column gap-3">
+          <label className="small fw-medium text-white-50 mb-0">Code Name / File Name</label>
+          <input
+            type="text"
+            value={codeName}
+            onChange={(e) => setCodeName(e.target.value)}
+            placeholder="e.g. Student Management System"
+            className="form-control form-control-dark rounded-xl"
+          />
+
           <div className="d-flex align-items-center justify-content-between">
             <label className="small fw-medium text-white-50 mb-0">Code Snippet</label>
             <select
