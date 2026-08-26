@@ -9,6 +9,7 @@ import Dashboard from '@/pages/Dashboard'
 import Solver from '@/pages/Solver'
 import History from '@/pages/History'
 import Bookmarks from '@/pages/Bookmarks'
+import ChatBox from '@/pages/ChatBox'
 import { supabase } from '@/supabaseClient'
 import { authApi } from '@/api/auth'
 import { useAuthStore } from '@/store/authStore'
@@ -69,6 +70,7 @@ export default function App() {
           <Route path="/solver" element={<Solver />} />
           <Route path="/history" element={<History />} />
           <Route path="/bookmarks" element={<Bookmarks />} />
+          <Route path="/chat" element={<ChatBox />} />
         </Route>
       </Routes>
     </div>

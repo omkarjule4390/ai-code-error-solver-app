@@ -43,6 +43,7 @@ export default function Navbar() {
             <NavItem to="/solver" icon="bi-code-slash" label="Solve" />
             <NavItem to="/history" icon="bi-clock-history" label="History" />
             <NavItem to="/bookmarks" icon="bi-bookmark" label="Bookmarks" />
+            <NavItem to="/chat" icon="bi-chat-dots" label="AI Chat" />
           </div>
         )}
 

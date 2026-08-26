@@ -8,9 +8,19 @@ import { errorReportsApi } from '@/api/errorReports'
 import { useAuthStore } from '@/store/authStore'
 import type { ErrorReport } from '@/types'
 
-const LANGUAGES = [
-  'javascript', 'typescript', 'python', 'java', 'csharp', 'cpp',
-  'go', 'rust', 'php', 'ruby', 'kotlin', 'swift', 'sql',
+const LANGUAGES: { value: string; label: string }[] = [
+  { value: 'c', label: 'C' },
+  { value: 'cpp', label: 'C++' },
+  { value: 'python', label: 'Python' },
+  { value: 'java', label: 'Java' },
+  { value: 'html', label: 'HTML' },
+  { value: 'css', label: 'CSS' },
+  { value: 'javascript', label: 'JavaScript' },
+  { value: 'php', label: 'PHP' },
+  { value: 'sql', label: 'SQL' },
+  { value: 'swift', label: 'Swift' },
+  { value: 'csharp', label: 'C#' },
+  { value: 'ruby', label: 'Ruby' },
 ]
 
 export default function Solver() {
@@ -101,8 +111,8 @@ export default function Solver() {
               style={{ width: 'auto' }}
             >
               {LANGUAGES.map((lang) => (
-                <option key={lang} value={lang}>
-                  {lang}
+                <option key={lang.value} value={lang.value}>
+                  {lang.label}
                 </option>
               ))}
             </select>
