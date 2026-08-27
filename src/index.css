@@ -3,7 +3,7 @@
 
 :root {
   /* Midnight Blue + Coral/Orange — unique developer-lab theme */
-  --navy-950: #0A0E1A;
+  --navy-950: #12141C;
   --navy-800: #131A2E;
   --cyan-400: #FF6B4A;
   --cyan-300: #FF8A6B;
@@ -93,7 +93,7 @@ a {
 }
 
 .navbar-blur {
-  background-color: rgba(10, 14, 26, 0.9);
+  background-color: rgba(18, 20, 28, 0.9);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--border-800);
 }
