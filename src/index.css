@@ -2,17 +2,17 @@
 @import 'bootstrap-icons/font/bootstrap-icons.css';
 
 :root {
-  /* Deep Navy + Electric Cyan + Soft Mint — unique developer-lab theme */
-  --navy-950: #0B1F33;
-  --navy-800: #123B5D;
-  --cyan-400: #19D3C5;
-  --cyan-300: #4EE6D9;
-  --mint-300: #A7F3D0;
+  /* Midnight Blue + Coral/Orange — unique developer-lab theme */
+  --navy-950: #0A0E1A;
+  --navy-800: #131A2E;
+  --cyan-400: #FF6B4A;
+  --cyan-300: #FF8A6B;
+  --mint-300: #FFB199;
   --bg-light: #F4FAFA;
   --white: #FFFFFF;
   --text-dark: #102A43;
   --text-secondary: #627D98;
-  --border-800: #1B3A57;
+  --border-800: #22283D;
 
   --severity-low: #22c55e;
   --severity-medium: #f59e0b;
@@ -41,7 +41,7 @@ a {
 }
 
 .bg-surface {
-  background-color: rgba(18, 59, 93, 0.45);
+  background-color: rgba(19, 26, 46, 0.6);
   border: 1px solid var(--border-800);
 }
 
@@ -86,14 +86,14 @@ a {
   background-color: var(--navy-950);
   border-color: var(--cyan-400);
   color: #E4ECF3;
-  box-shadow: 0 0 0 0.2rem rgba(25, 211, 197, 0.25);
+  box-shadow: 0 0 0 0.2rem rgba(255, 107, 74, 0.25);
 }
 .form-control-dark::placeholder {
   color: #6b7f94;
 }
 
 .navbar-blur {
-  background-color: rgba(11, 31, 51, 0.9);
+  background-color: rgba(10, 14, 26, 0.9);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--border-800);
 }
@@ -140,7 +140,7 @@ a {
   border: 1px solid transparent;
 }
 .report-row:hover {
-  border-color: rgba(25, 211, 197, 0.5);
+  border-color: rgba(255, 107, 74, 0.5);
 }
 
 .rounded-xl {
